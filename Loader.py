@@ -9,12 +9,12 @@ import csv
 import json
 from pymongo import MongoClient 
 
-readings = ["123,01-10-2010,00:00,0.0023",
-            "123,01-10-2010,00:30,0.0023",
-            "123,01-10-2010,01:00,0.0023",
-            "123,02-10-2010,00:00,0.0023",
-            "123,02-10-2010,00:30,0.0023",
-            "123,02-10-2010,01:00,0.0023",
+readings = ["123,01-10-2010,00:00,0.0123",
+            "123,01-10-2010,00:30,0.0223",
+            "123,01-10-2010,01:00,0.0323",
+            "123,02-10-2010,00:00,0.0413",
+            "123,02-10-2010,00:30,0.0523",
+            "123,02-10-2010,01:00,0.0623",
             "123,03-10-2010,00:00,0.0023",
             "124,03-10-2010,00:30,0.0023",
             "124,03-10-2010,01:00,0.0023",            
@@ -111,8 +111,13 @@ def readCSV():
         if custId != curCustId:
             # Save last customer
             if curCustId != "":
-                collReadings.insert(data)
-            data = {"_id": custId, 'cons': 0 }
+                writeResult = collReadings.update({'customer': curCustId},{'$set': data}, upsert = True)
+                print writeResult    
+               #get next one
+            data = collReadings.find_one({'customer': custId})
+            del data['_id']
+            if data == None:
+                data = {"customer": custId, 'cons': 0 }
             print data
             # Get the new one
             curCustId = custId
@@ -120,7 +125,8 @@ def readCSV():
         #and retrieve the one for the new customer
         data = addRec1(row, data)
 #Save the last update on exiting the loop
-    collReadings.insert(data)    
+    writeResult = collReadings.update({'customer': curCustId},{'$set': data}, upsert = True)
+    print writeResult    
     print data
     return data 
 def openDatabase(db):

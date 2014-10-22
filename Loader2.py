@@ -85,17 +85,17 @@ def addRec2(line, data):
         
     #TODO - if a period already exists then skip the update or remove the 
     # reading from the totals and replace????    
-    print     readYear
-    print data    
-    print data['readings']
+    #print     readYear
+    #print data    
+    #print data['readings']
     data['cons'] += reading
     yrIdx = next((i for i,d in enumerate(data['readings']) if d['year'] == readYear), None)
     if  yrIdx == None:
         data['readings'].append({'year': readYear, 'cons': 0, 'readings': []})
         yrIdx = len(data['readings']) - 1
     data['readings'][yrIdx]['cons'] += reading
-    print yrIdx
-    print data['readings'][0]
+    #print yrIdx
+    #print data['readings'][0]
     mnIdx = next((i for i,d in enumerate(data['readings'][yrIdx]['readings']) if d['month'] == readMonth), None)
     if  mnIdx == None:
         data['readings'][yrIdx]['readings'].append({'month': readMonth, 'cons': 0, 'readings': []})
@@ -118,15 +118,15 @@ def readCSV(fname):
         
         curCustId = ""
         for row in readings:
-            print row
+            #print row
             custId = row[0]
-            print custId    
+            #print custId    
             if custId != curCustId:
                 # Save last customer
                 if curCustId != "":
           #          pass
                     writeResult = collReadings.update({'customer': curCustId},{'$set': data}, upsert = True)
-         #           print writeResult    
+                    print writeResult    
                    #get next one
                 data = collReadings.find_one({'customer': custId})
          #       data = None    
@@ -134,7 +134,7 @@ def readCSV(fname):
                     data = {"customer": custId, 'cons': 0, 'readings': [] }
                 if '_id' in data:                
                     del data['_id']        
-                print data
+                #print data
                 # Get the new one
                 curCustId = custId
             #TODO     if curCustID <> custID then save the current record to the database
@@ -142,8 +142,8 @@ def readCSV(fname):
             data = addRec2(row, data)
     #Save the last update on exiting the loop
         writeResult = collReadings.update({'customer': curCustId},{'$set': data}, upsert = True)
-        #print writeResult    
-        print data
+        print writeResult    
+        
         return data 
 
 def openDatabase(db):
@@ -155,7 +155,7 @@ def openCollection(collection, db):
 
 collReadings = openCollection("Readings", openDatabase("Readings"))
 
-data = readCSV("data.csv")
+data = readCSV("C:\\SM\\POC Data File_1\\SAP-POC-DATA-1.CSV")
 
 f =  open("out.txt", "w")
 json.dump(data, f)
